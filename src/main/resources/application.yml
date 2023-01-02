@@ -1,0 +1,16 @@
+server:
+  port: 8083
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/project_insurance
+    username: postgres
+    password: dante123
+  jpa:
+    database: POSTGRESQL
+    show_sql: true
+    hibernate:
+      ddl-auto: create-drop
+  h2:
+    console:
+      enabled: true
+
