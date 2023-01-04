@@ -25,34 +25,34 @@ public class ProductService {
     }
 
     public ResponseEntity createTheProduct(Product product) throws AlreadyRegisteredException {
-        Optional<Product> productWithCode= productRepository.findWithName(product.getName());
-        if (productWithCode.isPresent()) throw new AlreadyRegisteredException(product.getIdentificationCode() + " già registrato: " + product.getName() + " già registrato");
+        Optional<Product> productWithCode= productRepository.findWithCode(product.getIdentificationCode());
+        if (productWithCode.isPresent()) throw new AlreadyRegisteredException("the code " + product.getIdentificationCode() + " già registrato, " + "or " + product.getName() + " già registrato");
         productRepository.save(product);
         return ResponseEntity.ok(product);
     }
 
-    public ResponseEntity singleProduct(Long id) throws NotFoundException {
+    public ResponseEntity singleProduct(long id) throws NotFoundException {
         Optional<Product> getProduct= productRepository.findById(id);
-        if (getProduct.isEmpty()) throw new NotFoundException("the product " + id + "not found");
-        return ResponseEntity.ok(getProduct);
+        if (getProduct.isEmpty()) throw new NotFoundException("the product with id: " + id + ", not found");
+        return ResponseEntity.ok(getProduct.get());
     }
 
     public ResponseEntity getProductWithCode(String code) throws NotFoundException {
         Optional<Product> optionalProduct= productRepository.findWithCode(code);
-        if (optionalProduct.isEmpty()) throw new NotFoundException("the product " + code + " not found");
-        return ResponseEntity.ok().body(optionalProduct);
+        if (optionalProduct.isEmpty()) throw new NotFoundException("the product with code: " + code + ", not found");
+        return ResponseEntity.ok(optionalProduct.get());
     }
 
     public ResponseEntity<Optional<Product>> getProductWithName(String name) throws NotFoundException {
         Optional<Product> getProduct= productRepository.findWithName(name);
-        if (getProduct.isEmpty()) throw new NotFoundException("the product " + name + " not found");
+        if (getProduct.isEmpty()) throw new NotFoundException("the product with name: " + name + ", not found");
         return ResponseEntity.ok().body(getProduct);
     }
 
-    public void modyfyProduct(Long id) throws NotFoundException, GenericException {
+    public void modyfyProduct(long id) throws NotFoundException, GenericException {
         Optional<Product> deleteProductFromDb= productRepository.findById(id);
         if (deleteProductFromDb.isEmpty()){
-            throw new NotFoundException("product " + id + " not found");
+            throw new NotFoundException("the product with id: " + id + ", not found");
         }
         if (deleteProductFromDb.get().isDelete()==false){
             deleteProductFromDb.get().setDelete(true);
