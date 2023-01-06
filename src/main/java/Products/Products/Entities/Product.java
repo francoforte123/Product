@@ -22,5 +22,5 @@ public class Product {
     private String placeOfOrigin;
     private String brand;
     private String identificationCode;
-    private boolean isDelete= false;
+    private boolean isDelete;
 }
