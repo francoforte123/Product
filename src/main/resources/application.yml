@@ -13,16 +13,3 @@ spring:
   h2:
     console:
       enabled: true
-      
----
-enviroment: test
-spring:
-  datasource:
-    url: jdbc:h2:mem:project_insurance
-    username: test
-    password: test
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-
