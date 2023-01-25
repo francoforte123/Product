@@ -6,7 +6,7 @@ import Products.Products.Exception.GenericException;
 import Products.Products.Exception.NotFoundException;
 import Products.Products.Repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,47 +18,67 @@ public class ProductService {
     @Autowired
     ProductRepository productRepository;
 
-    public List<Product> getAllProduct() throws NotFoundException{
-        List<Product> getProducts= productRepository.findAll();
+    public List<Product> getAllProduct() throws NotFoundException {
+        List<Product> getProducts = productRepository.getAllProducts();
         if (getProducts.isEmpty()) throw new NotFoundException("the product is not found");
-        return ResponseEntity.ok(getProducts).getBody();
+        return getProducts;
     }
 
-    public ResponseEntity createTheProduct(Product product) throws AlreadyRegisteredException {
-        Optional<Product> productWithCode= productRepository.findWithCode(product.getIdentificationCode());
-        if (productWithCode.isPresent()) throw new AlreadyRegisteredException("the code " + product.getIdentificationCode() + " già registrato, " + "or " + product.getName() + " già registrato");
-        productRepository.save(product);
-        return ResponseEntity.ok(product);
+    public Product createTheProduct(Product product) throws AlreadyRegisteredException {
+        Product out;
+        try {
+            out = productRepository.save(product);
+        } catch (DataAccessException e) {
+            throw new AlreadyRegisteredException("the code " + product.getIdentificationCode() + " già registrato, " + "or " + product.getName() + " già registrato");
+        }
+        return out;
     }
 
-    public ResponseEntity singleProduct(long id) throws NotFoundException {
-        Optional<Product> getProduct= productRepository.findById(id);
-        if (getProduct.isEmpty()) throw new NotFoundException("the product with id: " + id + ", not found");
-        return ResponseEntity.ok(getProduct.get());
+    public Product singleProduct(long id) throws NotFoundException {
+        Optional<Product> optionalProduct = productRepository.getProductById(id);
+        return optionalProduct.orElseThrow(() -> new NotFoundException("the product with id: " + id + " not found"));
     }
 
-    public ResponseEntity getProductWithCode(String code) throws NotFoundException {
-        Optional<Product> optionalProduct= productRepository.findWithCode(code);
+
+    public Product getProductWithCode(String code) throws NotFoundException {
+        Optional<Product> optionalProduct = productRepository.findWithCode(code);
         if (optionalProduct.isEmpty()) throw new NotFoundException("the product with code: " + code + ", not found");
-        return ResponseEntity.ok(optionalProduct.get());
+        return optionalProduct.get();
     }
 
-    public ResponseEntity<Optional<Product>> getProductWithName(String name) throws NotFoundException {
-        Optional<Product> getProduct= productRepository.findWithName(name);
+    public Product getProductWithName(String name) throws NotFoundException {
+        Optional<Product> getProduct = productRepository.findWithName(name);
         if (getProduct.isEmpty()) throw new NotFoundException("the product with name: " + name + ", not found");
-        return ResponseEntity.ok().body(getProduct);
+        return getProduct.get();
     }
 
-    public void modyfyProduct(long id) throws NotFoundException, GenericException {
-        Optional<Product> deleteProductFromDb= productRepository.findById(id);
-        if (deleteProductFromDb.isEmpty()){
+    public Product deleteProduct(long id) throws NotFoundException, GenericException {
+        Optional<Product> deleteProductFromDb = productRepository.getProductById(id);
+        if (deleteProductFromDb.isEmpty()) {
             throw new NotFoundException("the product with id: " + id + ", not found");
         }
-        if (deleteProductFromDb.get().isDelete()==false){
+        if (deleteProductFromDb.get().isDelete() == false) {
             deleteProductFromDb.get().setDelete(true);
-        }else {
+        } else {
             throw new GenericException("exists product");
         }
-        productRepository.save(deleteProductFromDb.get());
+        return productRepository.save(deleteProductFromDb.get());
+    }
+
+
+    public Product updateProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    public Product findTheProductIfExists(String code) {
+        Optional<Product> getProduct = productRepository.getProductIfExists(code);
+        if (!getProduct.isPresent()) throw new NotFoundException("the product non found");
+        return getProduct.get();
+    }
+
+    public List<Product> getAllProductsDeleted() {
+        List<Product> optionalProduct = productRepository.getProductsDeleted();
+        if (optionalProduct.isEmpty()) throw new NotFoundException("the products not found");
+        return optionalProduct;
     }
 }

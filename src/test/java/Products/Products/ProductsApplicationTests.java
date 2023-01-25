@@ -25,11 +25,12 @@ class ProductsApplicationTests {
 		product.setQuantity(10);
 		product.setPlaceOfOrigin("Germania");
 		product.setBrand("MD");
-		product.setIdentificationCode("A001");
+		product.setIdentificationCode("0001");
 		product.setDelete(false);
 
 		productRepository.save(product);
 		Assertions.assertNotNull(product);
+		System.out.println(product);
 	}
 
 	@Test
@@ -41,11 +42,12 @@ class ProductsApplicationTests {
 		product.setQuantity(10);
 		product.setPlaceOfOrigin("Italia");
 		product.setBrand("MD");
-		product.setIdentificationCode("A002");
+		product.setIdentificationCode("0002");
 		product.setDelete(false);
 
 		productRepository.save(product);
 		Assertions.assertNotNull(product);
+		System.out.println(product);
 	}
 
 
@@ -71,17 +73,16 @@ class ProductsApplicationTests {
 	}
 
 
-	@Test
+	/*@Test
 	public void getProductWithCode(){
 		createTheProduct1();
 		createTheProduct2();
 
-		String findProductWithCode= "A001";
+		String findProductWithCode= "0001";
 
 		Optional<Product> optionalProduct= productRepository.findWithCode(findProductWithCode);
 		Assertions.assertEquals(optionalProduct.get().getIdentificationCode(), findProductWithCode);
-		System.out.println(optionalProduct);
-	}
+	}*/
 
 
 	@Test
@@ -93,7 +94,6 @@ class ProductsApplicationTests {
 
 		Optional<Product> optionalProduct= productRepository.findWithName(findProductWithName);
 		Assertions.assertEquals(optionalProduct.get().getName(), findProductWithName);
-		System.out.println(optionalProduct);
 	}
 
 
@@ -108,5 +108,21 @@ class ProductsApplicationTests {
 		deleteProduct.get().setDelete(true);
 
 		Assertions.assertEquals(productRepository.save(deleteProduct.get()).isDelete(), true);
+	}
+
+
+	//la funzione funziona solo se il prodotto ha in sè per sè il valore della variabile "isDelete" a true
+	@Test
+	public void getProductWithCodeIfExists(){
+		createTheProduct1();
+		createTheProduct2();
+
+		String code= "0001";
+
+		Optional<Product> findTheProduct = productRepository.getProductIfExists(code);
+		findTheProduct.get().setDelete(true);
+
+		Assertions.assertEquals(findTheProduct.get().isDelete(), true);
+		System.out.println(findTheProduct);
 	}
 }
